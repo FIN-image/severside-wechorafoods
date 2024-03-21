@@ -18,10 +18,10 @@ app.use(cors())
 mongoose.connect(process.env.MONGODB_URL, {
 })
 .then(() => {
-  console.log('Connected to MongoDB Local');
+  console.log('Connected to MongoDB Atlas');
 })
 .catch((error) => {
-  console.error('Error connecting to MongoDB Local:', error);
+  console.error('Error connecting to MongoDB Atlas:', error);
 });
 
 // Middleware
