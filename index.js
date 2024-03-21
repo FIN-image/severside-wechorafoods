@@ -1,12 +1,12 @@
 const express = require("express");
 const mongoose = require('mongoose');
-const User = require("./user"); 
+const User = require("./others/user"); 
 // const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 const cors = require('cors')
 const jwt = require('jsonwebtoken');
-const extractUserId = require('./extractUserId');
+const extractUserId = require('./others/extractUserId');
 
 const app = express();
 // app.use(bodyParser.json());
