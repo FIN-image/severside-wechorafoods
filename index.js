@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require('mongoose');
 const User = require("./others/user"); 
 // const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 const cors = require('cors')
 const jwt = require('jsonwebtoken');
