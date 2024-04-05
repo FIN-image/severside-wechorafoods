@@ -12,6 +12,8 @@ const userSchema = new mongoose.Schema({
   age: String,
   gender: String,
   bmr: String,
+  bmi: String,
+  tdee: String,
 });
 
 const User = mongoose.model('User', userSchema);
