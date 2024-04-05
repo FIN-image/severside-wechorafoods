@@ -32,16 +32,48 @@ app.use(express.json()); // Parse JSON bodies
 const calculateBMR = (gender, weight, height, age) => {
   let bmr;
   if (gender === 'Male') {
-      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+      bmr = Math.ceil(10 * weight + 6.25 * height - 5 * age + 5);
   } else {
-      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+      bmr = Math.ceil(10 * weight + 6.25 * height - 5 * age - 161);
   }
   return bmr;
 };
 
+const calculateBMI = (gender, height, weight) => {
+  let bmi;
+  if (gender === 'Male') {
+      bmi = Math.ceil(weight / ((height / 100) ** 2));
+  } else {
+      bmi = Math.ceil(weight / ((height / 100) ** 2));
+  }
+  return bmi;
+};
+
+const calculateTDEE = (bmr, activity_level) => {
+  let tdee;
+  let dee;
+  if (activity_level === "sedentary"){
+    dee = bmr * 1.2;
+    tdee = Math.ceil(dee * 100) / 100;
+  }else if (activity_level === "lightlyActive"){
+    dee = bmr * 1.375;
+    tdee = Math.ceil(dee * 100) / 100;
+  }else if (activity_level === "moderatelyActive"){
+    dee = bmr * 1.55;
+    tdee = Math.ceil(dee * 100) / 100;
+  }else if (activity_level === "veryActive"){
+    dee = bmr * 1.725;
+    tdee = Math.ceil(dee * 100) / 100;
+  }else if(activity_level === "extraActive"){
+    dee = bmr * 1.95;
+    tdee = Math.ceil(dee * 100) / 100;
+  }
+  return tdee;
+};
+
 // Registration route
 app.post('/api/register', async (req, res) => {
-    const { firstname, lastname, username, email, password, confirm_password, gender, weight, height, age} = req.body;
+    const { firstname, lastname, username, email, password, confirm_password, gender, weight, height, age, activity_level} = req.body;
   
     try {
       // Check if user already exists
@@ -58,6 +90,12 @@ app.post('/api/register', async (req, res) => {
 
       // Calculate BMR
       const bmr = calculateBMR(gender, weight, height, age);
+
+      // Calculate BMI
+      const bmi = calculateBMI(gender, height, weight);
+
+      // Calculate TDEE
+      const tdee = calculateTDEE(bmr, activity_level);
   
       // Create new user
       const newUser = new User({
@@ -71,6 +109,8 @@ app.post('/api/register', async (req, res) => {
         height,
         age,
         bmr,
+        bmi,
+        tdee,
       });
   
       // Save user to the database
@@ -127,6 +167,8 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
       res.status(200).json({
           name: user.firstname,
           bmr: user.bmr,
+          bmi: user.bmi,
+          tdee: user.tdee,
           message: 'Dashboard data retrieved successfully'
       });
   } catch (error) {
