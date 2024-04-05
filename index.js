@@ -138,7 +138,7 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
 // Routes
 app.get("/", (req, res) => { 
     console.log('i am running');
-    res.status(200).send('Hello, World!');
+    res.status(200).send('Hello, World! ');
 });
 
 
