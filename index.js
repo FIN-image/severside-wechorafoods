@@ -166,6 +166,8 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
       // Send user data and BMR to client
       res.status(200).json({
           name: user.firstname,
+          username: user.lastname,
+          email: user.email,
           bmr: user.bmr,
           bmi: user.bmi,
           tdee: user.tdee,
