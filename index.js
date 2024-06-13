@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require('mongoose');
 const User = require("./others/user"); 
+const Payment = require("./others/payment"); 
 // const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
@@ -183,6 +184,26 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
       res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Define the route
+app.post('/api/payment', (req, res) => {
+  const { subscriberName, email, planSubscribed, amount } = req.body;
+  // Validate input
+  if (!subscriberName || !email || !planSubscribed || !amount) {
+      return res.status(400).json({ error: "Missing required fields" });
+  }
+  User.findOne({ email: email })
+  .then(user => {
+      if (!user) {
+          return res.status(404).json({ error: "User not found" });
+      }
+      Payment.create(req.body)
+      .then(payment => res.json(payment))
+      .catch(err => res.status(500).json({ error: "Internal server error" }));
+  })
+  .catch(err => res.status(500).json({ error: "Internal server error" }));
+});
+
   
 // Routes
 app.get("/", (req, res) => { 
