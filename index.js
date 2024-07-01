@@ -155,21 +155,20 @@ app.post('/api/register', async (req, res) => {
 
 // Dashboard route
 app.get('/api/dashboard', extractUserId, async (req, res) => {
-  const userId = req.userId; // have middleware to extract userId from JWT
+  const userId = req.userId; // userId extracted from JWT
 
   try {
-      // Find user by userId
+      // Find user by userId in the database
       const user = await User.findById(userId);
       if (!user) {
           return res.status(404).json({ message: 'User not found' });
       }
 
-      // Send user data and BMR to client
-      res.status(200).json({
+      // Construct the response object with user data
+      const userData = {
           name: user.firstname,
-          username: user.firstname,
+          username: user.username, // Use username instead of firstname for username
           email: user.email,
-          password: user.password,
           age: user.age,
           gender: user.gender,
           height: user.height,
@@ -178,7 +177,10 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
           bmi: user.bmi,
           tdee: user.tdee,
           message: 'Dashboard data retrieved successfully'
-      });
+      };
+
+      // Send the constructed user data as JSON response
+      res.status(200).json(userData);
   } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
