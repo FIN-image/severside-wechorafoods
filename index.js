@@ -173,9 +173,9 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
           gender: user.gender,
           height: user.height,
           weight: user.weight,
-          bmr: user.bmr,
-          bmi: user.bmi,
-          tdee: user.tdee,
+          bmr: user.weight,
+          bmi: user.weight,
+          tdee: user.weight,
           message: 'Dashboard data retrieved successfully'
       };
 
