@@ -166,7 +166,7 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
 
       // Construct the response object with user data
       const userData = {
-          name: user.firstname,
+          name: user.username,
           username: user.username, // Use username instead of firstname for username
           email: user.email,
           age: user.age,
@@ -186,6 +186,35 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
       res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.get('/api/profile', extractUserId, async(req, res) => {
+  const userId = req.userId; // userId extracted from JWT
+
+  try{
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Construct the response object with user data
+    const userData = {
+      name: user.username,
+      username: user.username, // Use username instead of firstname for username
+      email: user.email,
+      age: user.age,
+      gender: user.gender,
+      height: user.height,
+      weight: user.weight,
+      bmr: user.bmr,
+      bmi: user.bmi,
+      tdee: user.tdee,
+      message: 'Dashboard data retrieved successfully'
+  };
+  res.status(200).json(userData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+}
+})
 
 // Define the route
 app.post('/api/payment', (req, res) => {
