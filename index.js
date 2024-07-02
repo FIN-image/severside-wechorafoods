@@ -166,7 +166,7 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
 
       // Construct the response object with user data
       const userData = {
-          name: user.username,
+          name: user.weight,
           username: user.username, // Use username instead of firstname for username
           email: user.email,
           age: user.age,
