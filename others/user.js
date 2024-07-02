@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   weight: String,
   height: String,
   age: String,
-  g: String,
+  gender: String,
   bmr: String,
   bmi: String,
   tdee: String,

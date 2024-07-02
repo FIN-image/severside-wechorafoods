@@ -30,9 +30,9 @@ app.use(express.json()); // Parse JSON bodies
 
 
 // Calculate BMR based on user's data
-const calculateBMR = (g, weight, height, age) => {
+const calculateBMR = (gender, weight, height, age) => {
   let bmr;
-  if (g === 'Male') {
+  if (gender === 'Male') {
       bmr = Math.ceil(10 * weight + 6.25 * height - 5 * age + 5);
   } else {
       bmr = Math.ceil(10 * weight + 6.25 * height - 5 * age - 161);
@@ -40,9 +40,9 @@ const calculateBMR = (g, weight, height, age) => {
   return bmr;
 };
 
-const calculateBMI = (g, height, weight) => {
+const calculateBMI = (gender, height, weight) => {
   let bmi;
-  if (g === 'Male') {
+  if (gender === 'Male') {
       bmi = Math.ceil(weight / ((height / 100) ** 2));
   } else {
       bmi = Math.ceil(weight / ((height / 100) ** 2));
@@ -74,7 +74,7 @@ const calculateTDEE = (bmr, activity_level) => {
 
 // Registration route
 app.post('/api/register', async (req, res) => {
-    const { firstname, lastname, username, email, password, confirm_password, g, weight, height, age, activity_level} = req.body;
+    const { firstname, lastname, username, email, password, confirm_password, gender, weight, height, age, activity_level} = req.body;
   
     try {
       // Check if user already exists
@@ -90,10 +90,10 @@ app.post('/api/register', async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Calculate BMR
-      const bmr = calculateBMR(g, weight, height, age);
+      const bmr = calculateBMR(gender, weight, height, age);
 
       // Calculate BMI
-      const bmi = calculateBMI(g, height, weight);
+      const bmi = calculateBMI(gender, height, weight);
 
       // Calculate TDEE
       const tdee = calculateTDEE(bmr, activity_level);
@@ -105,7 +105,7 @@ app.post('/api/register', async (req, res) => {
         username,
         email,
         password: hashedPassword,
-        g,
+        gender,
         weight,
         height,
         age,
@@ -170,7 +170,7 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
           username: user.username, // Use username instead of firstname for username
           email: user.email,
           age: user.age,
-          g: user.g,
+          gender: user.gender,
           height: user.height,
           weight: user.weight,
           bmr: user.bmr,
