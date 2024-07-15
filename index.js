@@ -28,7 +28,6 @@ mongoose.connect(process.env.MONGODB_URL, {
 // Middleware
 app.use(express.json()); // Parse JSON bodies
 
-
 // Calculate BMR based on user's data
 const calculateBMR = (gender, weight, height, age) => {
   let bmr;
@@ -71,6 +70,35 @@ const calculateTDEE = (bmr, activity_level) => {
   }
   return tdee;
 };
+
+// Average BMI Calculation
+const BMI_Average = (bmi) => {
+  let classification;
+  let bmiAverage;
+  let remark;
+  if(bmi <= 21.7){
+    classification = "Normal Range";
+    bmiAverage = bmi;
+    remark = "Average";
+  } else if(bmi <= 27.45){
+    classification = "Over Weight";
+    bmiAverage = bmi;
+    remark = "Middle Increase";
+  } else if(bmi <= 32.45){
+    classification = "Obesity Class I";
+    bmiAverage = bmi;
+    remark = "Moderate";
+  } else if(bmi <= 39.9){
+    classification = "Obesity Class II";
+    bmiAverage = bmi;
+    remark = "Severe";
+  } else if(bmi >= 40){
+    classification = "Obesity Class III";
+    bmiAverage = bmi;
+    remark = "Very Severe";
+  }
+  return {classification, bmiAverage, remark};
+}
 
 // Registration route
 app.post('/api/register', async (req, res) => {
@@ -163,10 +191,12 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
       if (!user) {
           return res.status(404).json({ message: 'User not found' });
       }
-
+      
+      const bmi = user.bmi
+      const bmiAvg = BMI_Average(bmi)
       // Construct the response object with user data
       const userData = {
-          name: user.weight,
+          name: user.username,
           username: user.username, // Use username instead of firstname for username
           email: user.email,
           age: user.age,
@@ -176,6 +206,7 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
           bmr: user.bmr,
           bmi: user.bmi,
           tdee: user.tdee,
+          bmiAvg: bmiAvg,
           message: 'Dashboard data retrieved successfully'
       };
 
@@ -184,6 +215,58 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
   } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Email route
+app.get('/api/email', async (req, res) => {
+  try {
+    const users = await User.find({});
+
+    const hasBmi = users.some(user => user.bmi !== undefined);
+    if (hasBmi) {
+      return res.json({ status: "ok", message: "Email sent successful"});
+    } else {
+      return res.status(500).json({ status: "error", message: "Data not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ status: "error", message: error.message });
+  }
+});
+
+
+// Update route
+app.post('/api/updateUser', extractUserId, async(req, res) => {
+  const userId = req.userId
+  const { name, weight, height, age, gender, activity_level, oldDate, newDate } = req.body;
+
+  // Calculate BMR
+  const bmr = calculateBMR(gender, weight, height, age);
+
+  // Calculate BMI
+  const bmi = calculateBMI(gender, height, weight);
+
+  // Calculate TDEE
+  const tdee = calculateTDEE(bmr, activity_level);
+
+  try{
+    await User.updateOne({_id: userId}, {
+      $set: {
+        name: name,
+        weight: weight,
+        height: height,
+        age: age,
+        gender: gender,
+        oldDate: oldDate,
+        newDate: newDate,
+        bmr: bmr,
+        bmi: bmi,
+        tdee: tdee,
+      }
+    })
+    return res.json({status: "ok", data: "updated"})
+  } catch (error){
+    return res.json({status: "error", data: error})
   }
 });
 
