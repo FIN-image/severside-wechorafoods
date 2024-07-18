@@ -8,6 +8,7 @@ require('dotenv').config();
 const cors = require('cors')
 const jwt = require('jsonwebtoken');
 const extractUserId = require('./others/extractUserId');
+const nodemailer = require('nodemailer');
 
 const app = express();
 // app.use(bodyParser.json());
@@ -72,32 +73,61 @@ const calculateTDEE = (bmr, activity_level) => {
 };
 
 // Average BMI Calculation
-const BMI_Average = (bmi) => {
+const BMI_Average = (bmi, firstname) => {
   let classification;
   let bmiAverage;
   let remark;
+  let user;
+  let greeting;
+  let difference;
+
+  const differentAverage ={
+      "values": [21.7, 27.45, 32.45, 39.9, 40.0],
+      "labels": ["Normal Range", "Over Weight", "Obesity Class I", "Obesity Class II", "Obesity Class III"]
+    };
+
   if(bmi <= 21.7){
     classification = "Normal Range";
     bmiAverage = bmi;
     remark = "Average";
+    user = firstname;
+    greeting = "Congratulations";
+    difference = "Your BMI appears to be in good shape. Please keep this weight in place."
+
   } else if(bmi <= 27.45){
     classification = "Over Weight";
     bmiAverage = bmi;
     remark = "Middle Increase";
+    user = firstname;
+    greeting = "Hello";
+    difference = `Your BMI is "${classification}". You need to burn ${bmi - 21.7}kg of calories. We recommend that you visit the nearest fitness center around or click on the link below to subscribe to our meal plan.`;
+
   } else if(bmi <= 32.45){
     classification = "Obesity Class I";
     bmiAverage = bmi;
     remark = "Moderate";
+    user = firstname;
+    greeting = "Hello";
+    difference = `Your BMI is "${classification}". You need to burn ${bmi - 21.7}kg of calories. We recommend that you visit the nearest fitness center around or click on the link below to subscribe to our meal plan.`;
+
   } else if(bmi <= 39.9){
     classification = "Obesity Class II";
     bmiAverage = bmi;
     remark = "Severe";
+    user = firstname;
+    greeting = "Hello";
+    difference = `Your BMI is "${classification}". You need to burn ${bmi - 21.7}kg of calories. We recommend that you visit the nearest fitness center around or click on the link below to subscribe to our meal plan.`;
+
   } else if(bmi >= 40){
     classification = "Obesity Class III";
     bmiAverage = bmi;
     remark = "Very Severe";
+    user = firstname;
+    greeting = "Hello";
+    difference = `Your BMI is "${classification}". You need to burn ${bmi - 21.7}kg of calories. We recommend that you visit the nearest fitness center around or click on the link below to subscribe to our meal plan.`;
+
   }
-  return {classification, bmiAverage, remark};
+  return {classification, bmiAverage, remark, user, greeting, difference, differentAverage};
 }
 
 // Registration route
@@ -219,20 +249,54 @@ app.get('/api/dashboard', extractUserId, async (req, res) => {
 });
 
 // Email route
-app.get('/api/email', async (req, res) => {
+app.post('/api/email', async (req, res) => {
   try {
     const users = await User.find({});
+    if (!users.length) {
+      return res.status(404).json({ message: 'No users found' });
+    }
 
-    const hasBmi = users.some(user => user.bmi !== undefined);
-    if (hasBmi) {
-      return res.json({ status: "ok", message: "Email sent successful"});
-    } else {
-      return res.status(500).json({ status: "error", message: "Data not found" });
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.USER,
+        pass: process.env.PASS
+      }
+    });
+
+    // Construct the email body
+    let emailBody = "Esteem User, kindly use the link below to update your health information for the week. Thank you, ...Regards Wechora Foods";
+    
+    try {
+      await transporter.sendMail({
+        from: process.env.FROM,
+        to: process.env.TO,
+        subject: 'Latest Health Information',
+        html: emailBody
+      });
+      res.sendStatus(200);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      res.status(500).json({ message: 'Error sending email' });
     }
   } catch (error) {
-    return res.status(500).json({ status: "error", message: error.message });
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Error fetching users' });
   }
 });
+
+
+
+  // try {
+  //   const users = await User.find({});
+
+  //   const hasBmi = users.some(user => {
+  //     console.log(user.bmi)
+  //   });
+  //   return res.json({ status: "ok", message: "Email sent successful"});
+  // } catch (error) {
+  //   return res.status(500).json({ status: "error", message: error.message });
+  // }
 
 
 // Update route
