@@ -334,7 +334,7 @@ app.post('/api/updateUser', extractUserId, async(req, res) => {
   }
 });
 
-// Define the route
+// Define the routes
 app.post('/api/payment', (req, res) => {
   const { subscriberName, email, planSubscribed, amount } = req.body;
   // Validate input
