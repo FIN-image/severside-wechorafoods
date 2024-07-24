@@ -82,8 +82,51 @@ const BMI_Average = (bmi, firstname) => {
   let difference;
 
   const differentAverage ={
-      "values": [21.7, 27.45, 32.45, 39.9, 40.0],
-      "labels": ["Normal Range", "Over Weight", "Obesity Class I", "Obesity Class II", "Obesity Class III"]
+      "values": [
+        {
+          "protein": 19.9,
+          "fats": 12.1,
+          "energy": 11.5,
+          "minerals": 21.0,
+          "vitamins": 12.5
+        },
+        {
+          "protein": 35.0,
+          "fats": 7.5,
+          "energy": 28.4,
+          "minerals": 17.5,
+          "vitamins": 15.25
+        },
+        {
+          "protein": 25.0,
+          "fats": 8.0,
+          "energy": 42.5,
+          "minerals": 4.5,
+          "vitamins": 21.0
+        },
+        {
+          "protein": 16.5,
+          "fats": 26.0,
+          "energy": 7.5,
+          "minerals": 12.0,
+          "vitamins": 7.5
+        },
+        {
+          "protein": 2.5,
+          "fats": 0.75,
+          "energy": 3.5,
+          "minerals": 24.0,
+          "vitamins": 1.5
+        },
+        {
+          "protein": 0.0,
+          "fats": 45.0,
+          "energy": 4.5,
+          "minerals": 0.0,
+          "vitamins": 12.5
+        },
+      ],
+      "labels": ["Food of animal origin", "Cereals", "Roots & Tubers", "Legumes, Pulses & Nuts", "Fruits & Vegetables", "Fats & Oils"]
     };
 
   if(bmi <= 21.7){
