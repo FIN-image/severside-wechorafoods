@@ -245,9 +245,11 @@ app.post('/api/register', async (req, res) => {
 
         // Generate JWT
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
+        const userData = {
+          userType: user.userType,
+        }
         // Return JWT to client
-        res.status(200).json({ token });
+        res.status(200).json({ token, user: userData });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
