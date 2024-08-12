@@ -175,7 +175,7 @@ const BMI_Average = (bmi, firstname) => {
 
 // Registration route
 app.post('/api/register', async (req, res) => {
-    const { firstname, lastname, username, email, password, confirm_password, gender, weight, height, age, activity_level} = req.body;
+    const { userType, firstname, lastname, username, email, password, confirm_password, gender, weight, height, age, activity_level} = req.body;
   
     try {
       // Check if user already exists
@@ -201,6 +201,7 @@ app.post('/api/register', async (req, res) => {
   
       // Create new user
       const newUser = new User({
+        userType,
         firstname,
         lastname,
         username,
