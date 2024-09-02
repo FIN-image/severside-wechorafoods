@@ -1,24 +1,26 @@
 const express = require("express");
 const mongoose = require('mongoose');
-const User = require("./others/user"); 
+const { User, Fitness } = require('./others/user');
 const Payment = require("./others/payment"); 
 // const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
-const cors = require('cors')
+const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const extractUserId = require('./others/extractUserId');
 const nodemailer = require('nodemailer');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 // app.use(bodyParser.json());
 
 app.use(cors())
+app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URL, {
-})
+mongoose.connect(process.env.MONGODB_URL)
 .then(() => {
   console.log('Connected to MongoDB Atlas');
 })
@@ -28,6 +30,19 @@ mongoose.connect(process.env.MONGODB_URL, {
 
 // Middleware
 app.use(express.json()); // Parse JSON bodies
+
+
+// Configure storage options
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/assets/'); // Directory where files will be saved
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+  }
+});
+
+const upload = multer({ storage: storage });
 
 // Calculate BMR based on user's data
 const calculateBMR = (gender, weight, height, age) => {
@@ -331,20 +346,6 @@ app.post('/api/email', async (req, res) => {
   }
 });
 
-
-
-  // try {
-  //   const users = await User.find({});
-
-  //   const hasBmi = users.some(user => {
-  //     console.log(user.bmi)
-  //   });
-  //   return res.json({ status: "ok", message: "Email sent successful"});
-  // } catch (error) {
-  //   return res.status(500).json({ status: "error", message: error.message });
-  // }
-
-
 // Update route
 app.post('/api/updateUser', extractUserId, async(req, res) => {
   const userId = req.userId
@@ -379,6 +380,71 @@ app.post('/api/updateUser', extractUserId, async(req, res) => {
     return res.json({status: "error", data: error})
   }
 });
+
+
+// Add route to handle file uploads
+app.post('/api/fitness', upload.single('fitnessImage'), async (req, res) => {
+  const { fitnessName, fitnessAddress, fitnessContact, fitnessEmail, fitnessWebsite, fitnessInstagram, fitnessFacebook } = req.body;
+  const fitnessImage = req.file.filename;
+
+  try {
+    // Check if the fitness center already exists
+    const existingFitness = await Fitness.findOne({ fitnessName, fitnessEmail });
+    if (existingFitness) {
+      return res.status(400).json({ message: 'Fitness Center already exists' });
+    }
+
+    // Create a new fitness center
+    const newFitness = new Fitness({
+      fitnessName,
+      fitnessAddress,
+      fitnessContact,
+      fitnessEmail,
+      fitnessWebsite,
+      fitnessInstagram,
+      fitnessFacebook,
+      fitnessImage // Save the file path in the database
+    });
+
+    // Save to the database
+    await newFitness.save();
+    res.status(200).json({ message: 'Fitness center successfully registered' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+// Onboard route
+app.get('/api/onBoardFitness', async (req, res) => {
+  try {
+      const fitnessCenters = await Fitness.find();
+      if (!fitnessCenters || fitnessCenters.length === 0) {
+          return res.status(404).json({ message: 'No center on board' });
+      }
+      
+      const userData = fitnessCenters.map(center => ({
+          fitnessName: center.fitnessName,
+          fitnessAddress: center.fitnessAddress,
+          fitnessContact: center.fitnessContact,
+          fitnessEmail: center.fitnessEmail,
+          fitnessWebsite: center.fitnessWebsite,
+          fitnessInstagram: center.fitnessInstagram,
+          fitnessFacebook: center.fitnessFacebook,
+          fitnessImage: center.fitnessImage
+      }));
+
+      // Send the array of fitness centers as JSON response
+      res.status(200).json(userData);
+  } catch (error) {
+      console.error('Error retrieving fitness centers:', error);
+      res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
 
 // Define the routes
 app.post('/api/payment', (req, res) => {
