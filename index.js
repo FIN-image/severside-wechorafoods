@@ -20,7 +20,10 @@ app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URL)
+mongoose.connect(process.env.MONGODB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
 .then(() => {
   console.log('Connected to MongoDB Atlas');
 })
@@ -442,6 +445,11 @@ app.get('/api/onBoardFitness', async (req, res) => {
       res.status(500).json({ message: 'Server error' });
   }
 });
+
+
+
+// Define Training routes
+
 
 
 
