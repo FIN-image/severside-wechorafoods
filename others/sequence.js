@@ -1,48 +1,27 @@
 const mongoose = require('mongoose');
 
 const counterSchema = new mongoose.Schema({
-    _id: {
-        type: String,
-        required: true
-    },
-    seq: {
-        type: Number,
-        required: true
-    },
+  _id: String,  // This will be the name of the collection (e.g., 'user', 'product')
+  seq: { type: Number, default: 0 }  // Sequence number for that collection
 });
 
 const Counter = mongoose.model('Counter', counterSchema);
 
-const getSequenceNextValue = async (seqName) => {
-    try {
-        const counter = await Counter.findByIdAndUpdate(
-            { "_id": seqName },
-            { "$inc": { "seq": 1 } },
-            { new: true }  // Return the updated document
-        );
-
-        if (counter) {
-            return counter.seq;  // Return the updated sequence value
-        } else {
-            return null;  // Handle case where the document is not found
-        }
-    } catch (error) {
-        throw error;  // Handle errors properly
-    }
-};
-
-const insertCounter = async (seqName) => {
-    const newCounter = new Counter({ _id: seqName, seq: 1 });
-    try {
-        const data = await newCounter.save();
-        return data.seq;
-    } catch (error) {
-        throw error;
-    }
+const getNextSequenceValue = async (sequenceName) => {
+  try {
+    const sequence = await Counter.findByIdAndUpdate(
+      { _id: sequenceName },
+      { $inc: { seq: 1 } },  // Increment the sequence number by 1
+      { new: true, upsert: true }  // Create a new counter doc if it doesn't exist
+    );
+    return sequence.seq;
+  } catch (error) {
+    console.error(`Error while getting next sequence value for ${sequenceName}:`, error);
+    throw error;  // Re-throw the error so it can be handled where this function is called
+  }
 };
 
 module.exports = {
-    Counter,
-    getSequenceNextValue,
-    insertCounter,
+  Counter,
+  getNextSequenceValue,
 };

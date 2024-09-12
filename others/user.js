@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const sequencing = require('./sequence');
 
-const userSchema = new mongoose.Schema({   // user schema ******************************************************
+// User Schema
+const userSchema = new mongoose.Schema({
   _id: Number,
   userType: String,
   firstname: String,
@@ -19,28 +20,21 @@ const userSchema = new mongoose.Schema({   // user schema **********************
   tdee: String,
 });
 
-userSchema.pre("save", function(next){
-  let doc = this;
-  sequencing.getSequenceNextValue("user_id")
-  .then(counter => {
-    console.log("infuse", counter);
-    if(!counter){
-      sequencing.insertCounter("user_id")
-      .then(counter => {
-        doc._id = counter;
-        console.log(doc)
-        next();
-      })
-      .catch(error => next(error))
-    }else{
-      doc._id = counter;
-      next();
+// Middleware to auto-increment _id
+userSchema.pre('save', async function (next) {
+  if (this.isNew) {
+    try {
+      this._id = await sequencing.getNextSequenceValue('user');
+    } catch (error) {
+      return next(error);
     }
-  })
-  .catch(error => next(error))
+  }
+  next();
 });
 
-const fitnessSchema = new mongoose.Schema({     // user schema ******************************************************
+// Fitness Schema
+const fitnessSchema = new mongoose.Schema({
+  _id: Number,
   fitnessName: String,
   fitnessAddress: String,
   fitnessContact: String,
@@ -49,10 +43,23 @@ const fitnessSchema = new mongoose.Schema({     // user schema *****************
   fitnessInstagram: String,
   fitnessFacebook: String,
   fitnessImage: String,
-})
+});
 
+// Middleware to auto-increment _id for fitness
+fitnessSchema.pre('save', async function (next) {
+  if (this.isNew) {
+    try {
+      this._id = await sequencing.getNextSequenceValue('question');
+    } catch (error) {
+      return next(error);
+    }
+  }
+  next();
+});
 
-const questionSchema = new mongoose.Schema({    // question schema ******************************************************
+// Question Schema
+const questionSchema = new mongoose.Schema({
+  _id: Number,
   question: String,
   optionA: String,
   optionB: String,
@@ -60,31 +67,19 @@ const questionSchema = new mongoose.Schema({    // question schema *************
   optionD: String,
 });
 
-questionSchema.pre("save", function(next){
-  let doc = this;
-  sequencing.getSequenceNextValue("user_id")
-  .then(counter => {
-    console.log("infuse", counter);
-    if(!counter){
-      sequencing.insertCounter("user_id")
-      .then(counter => {
-        doc._id = counter;
-        console.log(doc)
-        next();
-      })
-      .catch(error => next(error))
-    }else{
-      doc._id = counter;
-      next();
+// Middleware to auto-increment _id for questions
+questionSchema.pre('save', async function (next) {
+  if (this.isNew) {
+    try {
+      this._id = await sequencing.getNextSequenceValue('question');
+    } catch (error) {
+      return next(error);
     }
-  })
-  .catch(error => next(error))
+  }
+  next();
 });
 
-
-
-
-
+// Models
 const User = mongoose.model('User', userSchema);
 const Fitness = mongoose.model('Fitness', fitnessSchema);
 const Question = mongoose.model('Question', questionSchema);

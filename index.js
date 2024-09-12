@@ -478,7 +478,7 @@ app.get('/api/getTrainingQuestion', async(req, res) => {
   try{
     const question = await Question.find();
     if(question.length === 0){
-      res.status(404).json({message: 'No question existed'});
+      return res.status(404).json({message: 'No question existed'});
     }
     res.status(200).json(question);
   }catch(error){
