@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require('mongoose');
-const { User, Fitness } = require('./others/user');
+const { User, Fitness, Question } = require('./others/user');
 const Payment = require("./others/payment"); 
 // const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
@@ -11,6 +11,7 @@ const extractUserId = require('./others/extractUserId');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const path = require('path');
+const { error } = require("console");
 
 const app = express();
 // app.use(bodyParser.json());
@@ -448,10 +449,43 @@ app.get('/api/onBoardFitness', async (req, res) => {
 
 
 
-// Define Training routes
+// Define Training question routes ******************************************************************************************************
+app.post('/api/trainingQuestion', async (req, res) => {
+  try {
+    const { question, optionA, optionB, optionC, optionD } = req.body;
+
+    const trainingQuestion = new Question({
+      question,
+      optionA,
+      optionB,
+      optionC,
+      optionD
+    });
+
+    // Save question to the database
+    await trainingQuestion.save();
+
+    res.status(200).json({ message: 'Question uploaded successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
-
+// Define Training question routes ******************************************************************************************************
+app.get('/api/getTrainingQuestion', async(req, res) => {
+  try{
+    const question = await Question.find();
+    if(question.length === 0){
+      res.status(404).json({message: 'No question existed'});
+    }
+    res.status(200).json(question);
+  }catch(error){
+    console.log(error);
+    res.status(500).json({message: 'Server error in fetching the data'})
+  }
+})
 
 
 // Define the routes
