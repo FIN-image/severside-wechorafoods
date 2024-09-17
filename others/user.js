@@ -79,13 +79,36 @@ questionSchema.pre('save', async function (next) {
   next();
 });
 
+
+// Video Schema **************************************************************************************************
+const videoFileSchema = new mongoose.Schema({
+  _id: Number,
+  video: String,
+})
+
+// Middleware to auto-increment _id for video
+videoFileSchema.pre('save', async function (next) {
+  if (this.isNew) {
+    try {
+      this._id = await sequencing.getNextSequenceValue('video');
+    } catch (error) {
+      return next(error);
+    }
+  }
+  next();
+});
+
+
+
 // Models
 const User = mongoose.model('User', userSchema);
 const Fitness = mongoose.model('Fitness', fitnessSchema);
 const Question = mongoose.model('Question', questionSchema);
+const Video = mongoose.model('Video', videoFileSchema);
 
 module.exports = {
   User,
   Fitness,
   Question,
+  Video,
 };

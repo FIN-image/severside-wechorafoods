@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require('mongoose');
-const { User, Fitness, Question } = require('./others/user');
+const { User, Fitness, Question, Video } = require('./others/user');
 const Payment = require("./others/payment"); 
 // const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
@@ -484,6 +484,26 @@ app.get('/api/getTrainingQuestion', async(req, res) => {
   }catch(error){
     console.log(error);
     res.status(500).json({message: 'Server error in fetching the data'})
+  }
+});
+
+
+// Define the routes for video upload
+app.post("/api/video", upload.single("video"), async (req, res) => {
+  const video = req.file.filename;
+  try{
+    const existVideo = await Video.findOne({ video });
+    if(existVideo){
+      return res.status(400).json({ message: "Video already exists" });
+    }
+    const newVideo = new Video({
+      video: video,
+    });
+    await newVideo.save();
+    res.status(200).json({message: "Video saved to the database successfully"})
+  }catch(error){
+    console.log(error)
+    res.status(500).json({ message: "Server error, please try again later" });
   }
 })
 
