@@ -65,6 +65,7 @@ const questionSchema = new mongoose.Schema({
   optionB: String,
   optionC: String,
   optionD: String,
+  correctAnswer: String,
 });
 
 // Middleware to auto-increment _id for questions

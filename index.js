@@ -452,14 +452,15 @@ app.get('/api/onBoardFitness', async (req, res) => {
 // Define Training question routes ******************************************************************************************************
 app.post('/api/trainingQuestion', async (req, res) => {
   try {
-    const { question, optionA, optionB, optionC, optionD } = req.body;
+    const { question, optionA, optionB, optionC, optionD, correctAnswer } = req.body;
 
     const trainingQuestion = new Question({
       question,
       optionA,
       optionB,
       optionC,
-      optionD
+      optionD,
+      correctAnswer,
     });
 
     // Save question to the database
