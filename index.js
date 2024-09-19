@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require('mongoose');
-const { User, Fitness, Question, Video } = require('./others/user');
+const { User, Fitness, Question, Video, TestResult } = require('./others/user');
 const Payment = require("./others/payment"); 
 // const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
@@ -489,7 +489,7 @@ app.get('/api/getTrainingQuestion', async(req, res) => {
 });
 
 
-// Define the routes for video upload
+// Define the routes for video upload ******************************************************************************************************
 app.post("/api/video", upload.single("video"), async (req, res) => {
   const video = req.file.filename;
   try{
@@ -509,7 +509,56 @@ app.post("/api/video", upload.single("video"), async (req, res) => {
 })
 
 
-// Define the routes
+// Define the test result summary ******************************************************************************************************
+app.post("/api/TestResult", extractUserId, async (req, res) => {
+  const userId = req.userId;
+  const { successful, unsuccessful, score } = req.body;
+
+  try {
+    // Find the user by their unique ID
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Check if there's already a test result for this user
+    const existingTestResult = await TestResult.findOne({ userId: userId });
+
+    if (existingTestResult) {
+      // Update the existing test result if found
+      await TestResult.updateOne(
+        { userId: userId },  // Corrected to use userId, not _id
+        {
+          $set: {
+            successful: successful,
+            unsuccessful: unsuccessful,
+            score: score,
+          }
+        }
+      );
+      return res.status(200).json({ message: "Result updated successfully" });
+    }
+
+    // If no existing result, create a new test result
+    const newTestResult = new TestResult({
+      userId: userId,
+      successful: successful,
+      unsuccessful: unsuccessful,
+      score: score,
+    });
+    await newTestResult.save();
+
+    return res.status(200).json({ message: "Result created successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Oops! An error occurred while uploading the result" });
+  }
+});
+
+
+
+// Define the routes ******************************************************************************************************
 app.post('/api/payment', (req, res) => {
   const { subscriberName, email, planSubscribed, amount } = req.body;
   // Validate input

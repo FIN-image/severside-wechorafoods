@@ -101,15 +101,41 @@ videoFileSchema.pre('save', async function (next) {
 
 
 
+
+// Test Result Schema **************************************************************************************************
+const testResultSchema = new mongoose.Schema({
+  _id: Number,
+  userId: String,
+  successful: String,
+  unsuccessful: String,
+  score: String,
+})
+
+// Middleware to auto-increment _id for video
+testResultSchema.pre('save', async function (next) {
+  if (this.isNew) {
+    try {
+      this._id = await sequencing.getNextSequenceValue('Result');
+    } catch (error) {
+      return next(error);
+    }
+  }
+  next();
+});
+
+
+
 // Models
 const User = mongoose.model('User', userSchema);
 const Fitness = mongoose.model('Fitness', fitnessSchema);
 const Question = mongoose.model('Question', questionSchema);
 const Video = mongoose.model('Video', videoFileSchema);
+const TestResult = mongoose.model('Result', testResultSchema);
 
 module.exports = {
   User,
   Fitness,
   Question,
   Video,
+  TestResult,
 };
