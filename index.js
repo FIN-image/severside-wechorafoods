@@ -556,6 +556,32 @@ app.post("/api/TestResult", extractUserId, async (req, res) => {
   }
 });
 
+// Define the resultPdf route ******************************************************************************************************
+app.get('/api/resultPDF', extractUserId, async (req, res) => {
+  const userId = req.userId; // userId extracted from JWT
+
+  try {
+      // Find user by userId in the database
+      const test = await TestResult.findById(userId);
+      if (!test) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Construct the response object with user data
+      const testData = {
+          userId: test.userId,
+          successful: test.successful,
+          unsuccessful: test.unsuccessful,
+          score: test.score,
+      };
+
+      // Send the constructed user data as JSON response
+      res.status(200).json(testData);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 // Define the routes ******************************************************************************************************
