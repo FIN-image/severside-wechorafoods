@@ -562,11 +562,14 @@ app.get('/api/resultPDF', extractUserId, async (req, res) => {
 
   try {
       // Find user by userId in the database
-      const test = await TestResult.findById(userId);
-      if (!test) {
+      const user = await User.findById(userId);
+      const test = await TestResult.findOne({ userId });
+      if (!user) {
           return res.status(404).json({ message: 'User not found' });
       }
-      
+      if (!test) {
+        return res.status(404).json({ message: 'Result not found' });
+      }
       // Construct the response object with user data
       const testData = {
           userId: test.userId,
@@ -574,7 +577,6 @@ app.get('/api/resultPDF', extractUserId, async (req, res) => {
           unsuccessful: test.unsuccessful,
           score: test.score,
       };
-
       // Send the constructed user data as JSON response
       res.status(200).json(testData);
   } catch (error) {
