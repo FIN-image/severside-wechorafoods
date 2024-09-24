@@ -506,8 +506,20 @@ app.post("/api/video", upload.single("video"), async (req, res) => {
     console.log(error)
     res.status(500).json({ message: "Server error, please try again later" });
   }
-})
+});
 
+app.get("/api/getVideo", async (req, res) => {
+  try {
+    const videoFiles = await Video.findOne(); // `videoFiles` will be an array
+    if (!videoFiles) {
+      return res.status(404).json({ message: "No video files in the database" });
+    }
+    return res.status(200).json(videoFiles);
+  } catch (error) {
+    console.error("Error fetching video from the database", error);
+    res.status(500).json({ message: "Error fetching video from the database", error: error.message });
+  }
+});
 
 // Define the test result summary ******************************************************************************************************
 app.post("/api/TestResult", extractUserId, async (req, res) => {
