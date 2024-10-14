@@ -489,6 +489,7 @@ app.get('/api/getTrainingQuestion', async(req, res) => {
 });
 
 
+
 // Define the routes for video upload ******************************************************************************************************
 app.post("/api/video", upload.single("video"), async (req, res) => {
   const video = req.file.filename;
@@ -524,7 +525,7 @@ app.get("/api/getVideo", async (req, res) => {
 // Define the test result summary ******************************************************************************************************
 app.post("/api/TestResult", extractUserId, async (req, res) => {
   const userId = req.userId;
-  const { successful, unsuccessful, score } = req.body;
+  const { successful, unsuccessful, totalQuestions } = req.body;
 
   try {
     // Find the user by their unique ID
@@ -545,7 +546,7 @@ app.post("/api/TestResult", extractUserId, async (req, res) => {
           $set: {
             successful: successful,
             unsuccessful: unsuccessful,
-            score: score,
+            totalQuestions: totalQuestions,
           }
         }
       );
@@ -557,7 +558,7 @@ app.post("/api/TestResult", extractUserId, async (req, res) => {
       userId: userId,
       successful: successful,
       unsuccessful: unsuccessful,
-      score: score,
+      totalQuestions: totalQuestions,
     });
     await newTestResult.save();
 
@@ -587,10 +588,11 @@ app.get('/api/resultPDF', extractUserId, async (req, res) => {
           userId: test.userId,
           successful: test.successful,
           unsuccessful: test.unsuccessful,
-          score: test.score,
+          totalQuestions: test.totalQuestions,
       };
       // Send the constructed user data as JSON response
       res.status(200).json(testData);
+      console.log(testData)
   } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error' });

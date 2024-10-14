@@ -108,7 +108,7 @@ const testResultSchema = new mongoose.Schema({
   userId: String,
   successful: String,
   unsuccessful: String,
-  score: String,
+  totalQuestions: String,
 })
 
 // Middleware to auto-increment _id for video
